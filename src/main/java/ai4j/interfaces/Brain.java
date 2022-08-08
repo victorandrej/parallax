@@ -1,9 +1,9 @@
-package br.com.victorandrej.jia.interfaces;
+package ai4j.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.util.Optional;
 
-import br.com.victorandrej.jia.exceptions.DonkeyException;
+import ai4j.exceptions.DonkeyException;
 
 public interface Brain {
 

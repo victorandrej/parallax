@@ -1,4 +1,4 @@
-package br.com.victorandrej.jia.classes.factories;
+package ai4j.classes.factories;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -6,13 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import br.com.victorandrej.jia.classes.Lobe;
-import br.com.victorandrej.jia.exceptions.DonkeyException;
-import br.com.victorandrej.jia.interfaces.Ability;
-import br.com.victorandrej.jia.interfaces.Brain;
-import br.com.victorandrej.jia.interfaces.IOController;
-import br.com.victorandrej.jia.interfaces.Memory;
-import br.com.victorandrej.jia.records.SavedInstance;
+import ai4j.classes.Lobe;
+import ai4j.exceptions.DonkeyException;
+import ai4j.interfaces.Ability;
+import ai4j.interfaces.Brain;
+import ai4j.interfaces.IOController;
+import ai4j.interfaces.Memory;
+import ai4j.records.SavedInstance;
 
 public class BrainFactory {
 

@@ -1,8 +1,8 @@
-package br.com.victorandrej.jia.interfaces;
+package ai4j.interfaces;
 
 import java.util.Optional;
 
-import br.com.victorandrej.jia.records.SavedInstance;
+import ai4j.records.SavedInstance;
 
 public interface IOController {
 

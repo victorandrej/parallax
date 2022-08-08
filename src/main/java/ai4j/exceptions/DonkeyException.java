@@ -1,4 +1,4 @@
-package br.com.victorandrej.jia.exceptions;
+package ai4j.exceptions;
 
 public class DonkeyException extends RuntimeException {
 

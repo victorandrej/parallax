@@ -1,4 +1,4 @@
-package br.com.victorandrej.jia.exceptions;
+package ai4j.exceptions;
 
 public class UnregisteredClassType extends RuntimeException {
 	private static final long serialVersionUID = 1L;

@@ -1,4 +1,4 @@
-package br.com.victorandrej.jia.classes;
+package ai4j.classes;
 
 import java.util.LinkedList;
 import java.util.Queue;

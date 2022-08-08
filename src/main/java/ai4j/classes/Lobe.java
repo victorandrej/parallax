@@ -1,11 +1,11 @@
-package br.com.victorandrej.jia.classes;
+package ai4j.classes;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Consumer;
 
-import br.com.victorandrej.jia.interfaces.Brain;
-import br.com.victorandrej.jia.interfaces.Memory;
-import br.com.victorandrej.jia.records.Souvenir;
+import ai4j.interfaces.Brain;
+import ai4j.interfaces.Memory;
+import ai4j.records.Souvenir;
 
 /**
  * 

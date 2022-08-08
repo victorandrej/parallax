@@ -1,4 +1,4 @@
-package br.com.victorandrej.jia.interfaces;
+package ai4j.interfaces;
 
 public interface Ability extends Iterable<Memory> {
 }
