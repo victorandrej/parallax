@@ -29,6 +29,6 @@ public @interface Required {
 	 * triggered in order
 	 * 
 	 */
-	public int methodTrigger() default -1;
+	public int[] methodTrigger() default {};
 
 }

@@ -40,14 +40,16 @@ public class Parallax {
 					Required req = field.getAnnotation(Required.class);
 
 					if (req.clazz().equals(Object.class) || req.clazz().equals(method.getDeclaringClass())) {
-						if (field.isAnnotationPresent(Retain.class)
-								&& !instanceController.exists(clazz, object.getClass()))
-							instanceController.put(clazz, object.getClass(), object);
-						else if (!field.isAnnotationPresent(Retain.class))
+
+						if (field.isAnnotationPresent(Retain.class)) {
+							if (!instanceController.exists(clazz, object.getClass()))
+								instanceController.put(clazz, object.getClass(), object);
+						} else {
 							queueController.put(object, field);
+						}
 					}
 				}));
-		validate();
+		this.validate();
 	}
 
 	private synchronized void validate() {
@@ -66,7 +68,7 @@ public class Parallax {
 
 			if (instances.size() == requiredFields.count() || requiredFields.anyMatch(
 					f -> f.isAnnotationPresent(Required.class) && f.getAnnotation(Required.class).trigger())) {
-				
+				//
 			}
 
 		});
