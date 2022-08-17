@@ -40,20 +40,28 @@ public class Cloner {
 
 	}
 
+	private static <T> T shallow(T object) {
+		return clone(object, Cloner::shallowClone);
+	}
+
 	private static <T> T deep(T object) {
+		return clone(object, Cloner::deepClone);
+	}
+
+	private static <T> T clone(T object, CloneMethod cloneMethod) {
 		Class<?> clazz = object.getClass();
 		T clone = null;
 		try {
 			clone = (T) Cloner.unsafe.allocateInstance(clazz);
-			deepClone(clazz, object, clone);
-			Class<?> superClass;
+			cloneMethod.clone(clazz, object, clone);
+			Class<?> superClass = clazz.getSuperclass();
 
 			do {
-				superClass = clazz.getSuperclass();
-				deepClone(superClass, object, clone);
-			} while (!superClass.equals(Object.class));
+				cloneMethod.clone(superClass, object, clone);
+				superClass = superClass.getSuperclass();
+			} while (superClass != null);
 
-		} catch (InstantiationException | IllegalArgumentException | IllegalAccessException e) {
+		} catch (Exception e) {
 			// will never occour
 			e.printStackTrace();
 		}
@@ -62,19 +70,28 @@ public class Cloner {
 
 	}
 
-	private static void deepClone(Class<?> clazz, Object instance, Object clone)
+	private static <T> void deepClone(Class<?> clazz, T instance, T clone)
 			throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : clazz.getDeclaredFields()) {
+			boolean isPrimitive = ClassUtils.isPrimitiveOrWrapper(field.getType())
+					|| field.getType().equals(String.class);
 			field.setAccessible(true);
-			field.set(clone,
-					ClassUtils.isPrimitiveOrWrapper(field.getType()) ? field.get(instance) : deep(field.get(instance)));
+			field.set(clone, isPrimitive ? field.get(instance) : deep(field.get(instance)));
 		}
 
 	}
 
-	private static<T> T shallow(T object) {
-		// TODO Auto-generated method stub
-		return null;
+	private static <T> void shallowClone(Class<?> clazz, T instance, T clone)
+			throws IllegalArgumentException, IllegalAccessException {
+		for (Field field : clazz.getDeclaredFields()) {
+			field.setAccessible(true);
+			field.set(clone, field.get(instance));
+		}
+
+	}
+
+	private interface CloneMethod {
+		public <T> void clone(Class<?> clazz, T instance, T clone) throws Exception;
 	}
 
 }

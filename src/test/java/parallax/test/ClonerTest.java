@@ -14,8 +14,18 @@ public class ClonerTest {
 		 
 		 Test1 clone = Cloner.clone(principal, CloneType.DEEP);
 		 
-		 Assert.assertEquals(principal, clone);
+		 Assert.assertNotEquals(principal.teste3, clone.teste3);
 	 }
+	 
+	 @Test
+	 public void shalowCloningTest() {
+		 Test1 principal = new Test1();
+		 
+		 Test1 clone = Cloner.clone(principal, CloneType.SHALLOW);
+		 
+		 Assert.assertEquals(principal.teste3, clone.teste3);
+	 }
+	 
 
 	class Test1 extends Test2{
 
