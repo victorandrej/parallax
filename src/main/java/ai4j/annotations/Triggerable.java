@@ -25,5 +25,7 @@ public @interface Triggerable {
 	 * order of execution of methods
 	 * 
 	 */
-	public int triggerOrder() default -1;
+	public int triggerOrder() default 1;
+	
+	public CloneType cloneType() default CloneType.NONE;
 }

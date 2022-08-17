@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import ai4j.annotations.CloneType;
 import ai4j.annotations.Required;
 import ai4j.annotations.Retain;
 import ai4j.annotations.Triggerable;
@@ -38,17 +39,14 @@ public class Parallax {
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public void trigger(Object object) {
-
+	public final void trigger(Object object) {
 		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-
 		StackTraceElement caller = stack[2];
-
 		caller.getMethodName();
 
 	}
 
-	private void trigger(Method method, Object object) {
+	private void trigger(Method method, Object object, CloneType cloneType) {
 		typeController.aceptableClasses(object.getClass())
 				.forEach(clazz -> getFieldsByType(clazz, object.getClass()).forEach(field -> {
 					Required req = field.getAnnotation(Required.class);
@@ -57,9 +55,9 @@ public class Parallax {
 
 						if (field.isAnnotationPresent(Retain.class)) {
 							if (!instanceController.exists(clazz, object.getClass()))
-								instanceController.put(clazz, object.getClass(), object);
+								instanceController.put(clazz, object.getClass(), Cloner.clone(object,cloneType));
 						} else {
-							queueController.put(object, field);
+							queueController.put(Cloner.clone(object,cloneType), field);
 						}
 					}
 				}));
@@ -115,7 +113,7 @@ public class Parallax {
 
 		Runnable runnable = () -> {
 			try {
-				method.invoke(instance);
+				this.trigger(method, method.invoke(instance), triggerable.cloneType());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				log.push(LogType.CRITICAL, "Method: " + method.getName() + " cannot be invoked on class: "
 						+ instance.getClass().getName() + " reazon: " + e.getMessage());
