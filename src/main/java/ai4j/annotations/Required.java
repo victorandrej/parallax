@@ -14,7 +14,7 @@ public @interface Required {
 	 * field. if not specified the field will receive a reference from any class
 	 * 
 	 */
-	public Class<?> clazz() default Object.class;
+	public Class<?> fromClass() default Object.class;
 
 	/**
 	 * if this flag is true when an field obtains a reference of object this class

@@ -28,4 +28,7 @@ public @interface Triggerable {
 	public int triggerOrder() default 1;
 	
 	public CloneType cloneType() default CloneType.NONE;
+	
+	public Class<?> toClass() default Object.class;
+	
 }

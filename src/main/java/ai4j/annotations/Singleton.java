@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  *
  */
 @Retention(RUNTIME)
-@Target({ FIELD, TYPE })
+@Target( TYPE )
 public @interface Singleton {
 
 }
