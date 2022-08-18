@@ -39,25 +39,40 @@ public class Parallax {
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
 	}
 
-	public final void trigger(Object object) {
+	public void register(Class<?> clazz) {
+		
+	}
+	
+	
+	
+	public final void trigger(Object object, CloneType cloneType) {
 		StackTraceElement[] stack = Thread.currentThread().getStackTrace();
 		StackTraceElement caller = stack[2];
-		caller.getMethodName();
+		Class<?> clazz = null;
+		try {
+			clazz = Class.forName(caller.getClassName());
+		} catch (ClassNotFoundException e) {
+			log.push(LogType.WARNNING,
+					"Cannot localizate class: " + caller.getClassName() + " reason: " + e.getMessage());
+			return;
+		}
+
+		this.trigger(clazz, object, cloneType);
 
 	}
 
-	private void trigger(Method method, Object object, CloneType cloneType) {
+	private void trigger(Class<?> triggeredClass, Object object, CloneType cloneType) {
 		typeController.aceptableClasses(object.getClass())
 				.forEach(clazz -> getFieldsByType(clazz, object.getClass()).forEach(field -> {
 					Required req = field.getAnnotation(Required.class);
 
-					if (req.clazz().equals(Object.class) || req.clazz().equals(method.getDeclaringClass())) {
+					if (req.clazz().equals(Object.class) || req.clazz().equals(triggeredClass)) {
 
 						if (field.isAnnotationPresent(Retain.class)) {
 							if (!instanceController.exists(clazz, object.getClass()))
-								instanceController.put(clazz, object.getClass(), Cloner.clone(object,cloneType));
+								instanceController.put(clazz, object.getClass(), Cloner.clone(object, cloneType));
 						} else {
-							queueController.put(Cloner.clone(object,cloneType), field);
+							queueController.put(Cloner.clone(object, cloneType), field);
 						}
 					}
 				}));
@@ -113,10 +128,10 @@ public class Parallax {
 
 		Runnable runnable = () -> {
 			try {
-				this.trigger(method, method.invoke(instance), triggerable.cloneType());
+				this.trigger(method.getClass(), method.invoke(instance), triggerable.cloneType());
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				log.push(LogType.CRITICAL, "Method: " + method.getName() + " cannot be invoked on class: "
-						+ instance.getClass().getName() + " reazon: " + e.getMessage());
+						+ instance.getClass().getName() + " reason: " + e.getMessage());
 			}
 		};
 
@@ -146,7 +161,7 @@ public class Parallax {
 			return field.get(instance) != null;
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			log.push(LogType.WARNNING, "Cannot verify instance of field: " + field.getName() + " of class: "
-					+ field.getDeclaringClass() + " reazon: " + e.getMessage());
+					+ field.getDeclaringClass() + " reason: " + e.getMessage());
 
 		}
 		return false;
@@ -171,13 +186,13 @@ public class Parallax {
 					i.field().set(instance, i.instance());
 				} catch (IllegalArgumentException | IllegalAccessException e) {
 					log.push(LogType.CRITICAL, "cannot set value to field: " + i.field().getName() + " of class: "
-							+ clazz.getName() + " reazon: " + e.getMessage());
+							+ clazz.getName() + " reason: " + e.getMessage());
 				}
 			});
 			return Optional.of(instance);
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
-			log.push(LogType.CRITICAL, "cannot create instance of: " + clazz.getName() + " reazon: " + e.getMessage());
+			log.push(LogType.CRITICAL, "cannot create instance of: " + clazz.getName() + " reason: " + e.getMessage());
 
 		}
 
