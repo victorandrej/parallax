@@ -1,17 +1,18 @@
 package ai4j.classes;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class QueueController {
-	private HashMap<Field, Queue<Object>> queues;
+	private Map<Field, Queue<Object>> queues;
 
 	public QueueController() {
-		queues = new HashMap<>();
+		queues = new ConcurrentHashMap<>();
 	}
 
 	public synchronized void register(Field field) {

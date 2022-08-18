@@ -48,6 +48,7 @@ public class Cloner {
 		return clone(object, Cloner::deepClone);
 	}
 
+	@SuppressWarnings("unchecked")
 	private static <T> T clone(T object, CloneMethod cloneMethod) {
 		Class<?> clazz = object.getClass();
 		T clone = null;
