@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 import ai4j.annotations.CloneType;
 import ai4j.annotations.Required;
-import ai4j.annotations.Retain;
+import ai4j.annotations.Singleton;
 import ai4j.annotations.Triggerable;
 import ai4j.classes.logs.Log;
 import ai4j.classes.logs.LogType;
@@ -68,7 +68,7 @@ public class Parallax {
 
 					if (req.clazz().equals(Object.class) || req.clazz().equals(triggeredClass)) {
 
-						if (field.isAnnotationPresent(Retain.class)) {
+						if (field.isAnnotationPresent(Singleton.class)) {
 							if (!instanceController.exists(clazz, object.getClass()))
 								instanceController.put(clazz, object.getClass(), Cloner.clone(object, cloneType));
 						} else {
@@ -85,7 +85,7 @@ public class Parallax {
 			Stream<Field> requiredFields = this.getRequiredField(clazz);
 			requiredFields.forEach(field -> {
 
-				if (field.isAnnotationPresent(Retain.class))
+				if (field.isAnnotationPresent(Singleton.class))
 					this.instanceController.get(clazz, field.getType())
 							.ifPresent(instance -> instances.add(new Instance(field, instance)));
 				else
