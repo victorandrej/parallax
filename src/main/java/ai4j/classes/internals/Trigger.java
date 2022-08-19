@@ -4,10 +4,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ai4j.annotations.Required;
@@ -56,10 +54,10 @@ public final class Trigger {
 		Runnable runnable = () -> {
 			try {
 				Object returnObject = method.invoke(instance);
-				
+
 				if (!method.getReturnType().equals(void.class) && returnObject != null) {
-					parallax.trigger(method.getDeclaringClass(), returnObject, triggerable.cloneType(),
-							triggerable.toClass());
+					for (Class<?> toclass : triggerable.toClass())
+						parallax.trigger(method.getDeclaringClass(), returnObject, triggerable.cloneType(), toclass);
 				}
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				parallax.log(LogType.CRITICAL, "Method: " + method.getName() + " cannot be invoked on class: "
@@ -77,12 +75,22 @@ public final class Trigger {
 
 		List<Integer> methodsToTrigger = new ArrayList<>();
 
-		Stream.of(instance.getClass().getFields())
-				.filter(f -> hasInstance(f, instance) && f.isAnnotationPresent(Required.class)
-						&& f.getAnnotation(Required.class).trigger())
-				.map(f -> f.getAnnotation(Required.class).methodTrigger()).reduce(this::joinIntArray).ifPresent(i -> {
-					methodsToTrigger.addAll(Arrays.stream(i).distinct().boxed().collect(Collectors.toList()));
-				});
+		for (Field f : instance.getClass().getFields()) {
+
+			if (!hasInstance(f, instance) || !f.isAnnotationPresent(Required.class)
+					|| !f.getAnnotation(Required.class).trigger()) {
+				continue;
+			}
+
+			int[] values = f.getAnnotation(Required.class).methodTrigger();
+
+			for (int i : values) {
+				if (!methodsToTrigger.contains(i))
+					methodsToTrigger.add(i);
+			}
+
+		}
+
 		return methodsToTrigger;
 	}
 
@@ -98,10 +106,4 @@ public final class Trigger {
 		return false;
 	}
 
-	private int[] joinIntArray(int[] array1, int[] array2) {
-		int[] newArray = Arrays.copyOf(array1, array1.length + array2.length);
-		System.arraycopy(array2, 0, newArray, array1.length, array2.length);
-		return newArray;
-
-	}
 }

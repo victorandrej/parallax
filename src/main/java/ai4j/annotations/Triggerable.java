@@ -29,6 +29,6 @@ public @interface Triggerable {
 	
 	public CloneType cloneType() default CloneType.NONE;
 	
-	public Class<?> toClass() default Object.class;
+	public Class<?>[] toClass() default Object.class;
 	
 }

@@ -16,7 +16,8 @@ public class QueueController {
 	}
 
 	public synchronized void register(Field field) {
-		this.queues.put(field, new LinkedList<>());
+		if (this.queues.get(field) == null)
+			this.queues.put(field, new LinkedList<>());
 	}
 
 	public synchronized void put(Object object, Field field) {

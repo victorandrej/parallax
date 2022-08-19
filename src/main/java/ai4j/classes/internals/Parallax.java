@@ -4,10 +4,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import org.apache.commons.lang3.ClassUtils;
 
 import ai4j.annotations.CloneType;
 import ai4j.annotations.Required;
@@ -21,23 +24,20 @@ import ai4j.classes.logs.Log;
 import ai4j.classes.logs.LogType;
 
 public class Parallax {
-	private static Parallax instance;
-
-	public static Parallax getInstance() {
-		//
-		return Parallax.instance;
-	}
 
 	private QueueController queueController;
 	private TypeController typeController;
 	private List<Class<?>> registeredClasses;
-	private InstanceController instanceController = new InstanceController();
+	private InstanceController instanceController;
 	private Log log;
+	private ThreadQueue threadQueue;
 
 	private Parallax() {
+		this.instanceController = new InstanceController();
 		this.queueController = new QueueController();
 		this.typeController = new TypeController();
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
+		this.threadQueue = new ThreadQueue();
 	}
 
 	public Parallax(Log log) {
@@ -45,11 +45,28 @@ public class Parallax {
 		this.log = log;
 	}
 
-	public void log(LogType type, String message) {
+	public void register(Class<?> clazz) {
+		if (clazz == null) {
+			this.log.push(LogType.WARNNING, "fail on register class, class is null");
+			return;
+		}
+
+		Stream.of(clazz.getDeclaredFields()).forEach(f -> {
+			Required req = f.getAnnotation(Required.class);
+			if (req != null) {
+				this.queueController.register(f);
+				for (Class<?> fromclass : req.fromClass())
+					this.typeController.register(fromclass, clazz);
+			}
+		});
+		registeredClasses.add(clazz);
+	}
+
+	void log(LogType type, String message) {
 		this.log.push(type, message);
 	}
 
-	public Optional<Object> createInstance(List<Instance> instances, Class<?> clazz) {
+	Optional<Object> createInstance(List<Instance> instances, Class<?> clazz) {
 
 		Object instance = null;
 		boolean isManaged = false;
@@ -63,8 +80,8 @@ public class Parallax {
 
 		try {
 
-			if (instance != null) {
-				Constructor<?> constructor = clazz.getConstructor();
+			if (instance == null) {
+				Constructor<?> constructor = clazz.getDeclaredConstructor();
 				constructor.setAccessible(true);
 				instance = constructor.newInstance();
 			}
@@ -80,7 +97,7 @@ public class Parallax {
 				}
 			}
 
-			if (!isManaged)
+			if (!isManaged && clazz.isAnnotationPresent(Singleton.class))
 				this.instanceController.put(clazz, instance);
 
 			return Optional.of(instance);
@@ -93,29 +110,49 @@ public class Parallax {
 		return Optional.empty();
 	}
 
-	private Stream<Field> getRequiredField(Class<?> clazz) {
-		return Stream.of(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Required.class));
+	private List<Field> getRequiredField(Class<?> clazz) {
+		return Stream.of(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Required.class)).toList();
+	}
+
+	public void trigger(Object object, CloneType cloneType, Class<?> toClass) {
+		String className = Thread.currentThread().getStackTrace()[2].getClassName();
+		try {
+			Class<?> fromClass = Class.forName(className);
+			this.trigger(fromClass, object, cloneType, toClass);
+
+		} catch (ClassNotFoundException e) {
+			// at this point the class always exists
+		}
+
 	}
 
 	void trigger(Class<?> fromClass, Object object, CloneType cloneType, Class<?> toClass) {
 
-		List<Instance> instances = new ArrayList<>();
-
 		for (Class<?> clazz : this.registeredClasses) {
 			new Thread(() -> {
-				Stream<Field> requiredFields = this.getRequiredField(clazz);
-				requiredFields.forEach(field -> {
-					if (validInstance(object, field, cloneType, clazz, fromClass, toClass))
-						this.queueController.put(Cloner.clone(object, cloneType), field);
+				this.threadQueue.register();
+				this.threadQueue.threadWait();
 
-					this.getInstance(instances, field);
-				});
+				try {
+					List<Instance> instances = new ArrayList<>();
+					List<Field> requiredFields = this.getRequiredField(clazz);
+					requiredFields.forEach(field -> {
 
-				if (!canTrigger(instances, requiredFields))
-					return;
+						if (validInstance(object, field, cloneType, clazz, fromClass, toClass))
+							this.queueController.put(Cloner.clone(object, cloneType), field);
 
-				this.trigger(clazz, instances);
-				instances.forEach(i -> this.queueController.poll(i.field()));
+						this.getInstance(instances, field);
+					});
+
+					if (!canTrigger(instances, requiredFields))
+						return;
+
+					this.trigger(clazz, instances);
+					instances.forEach(i -> this.queueController.poll(i.field()));
+
+				} finally {
+					this.threadQueue.exit();
+				}
 
 			}).start();
 		}
@@ -127,9 +164,9 @@ public class Parallax {
 		trigger.trigger();
 	}
 
-	private boolean canTrigger(List<Instance> instances, Stream<Field> requiredFields) {
-		boolean allInstanceArePopuled = instances.size() == requiredFields.count();
-		boolean anyFieldHasTriggered = requiredFields
+	private boolean canTrigger(List<Instance> instances, List<Field> requiredFields) {
+		boolean allInstanceArePopuled = instances.size() == requiredFields.size();
+		boolean anyFieldHasTriggered = requiredFields.stream()
 				.anyMatch(f -> f.isAnnotationPresent(Required.class) && f.getAnnotation(Required.class).trigger());
 
 		return allInstanceArePopuled || anyFieldHasTriggered;
@@ -149,15 +186,21 @@ public class Parallax {
 	private boolean validInstance(Object object, Field field, CloneType cloneType, Class<?> clazz, Class<?> fromClass,
 			Class<?> toClass) {
 		Required req = field.getAnnotation(Required.class);
-		boolean expectedClass = (req.fromClass().equals(Object.class) || req.fromClass().equals(fromClass));
+		boolean expectedClass = ((req.fromClass().length == 1 && req.fromClass()[0].equals(Object.class))
+				|| Arrays.asList(req.fromClass()).contains(fromClass));
+		
 		boolean requestedClass = (toClass.equals(Object.class) || toClass.equals(clazz));
-		boolean sameType = field.getType().equals(object.getClass());
-
+		
+		Class<?> fieldType = field.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(field.getType())
+				: field.getType();
+		
+		boolean sameType = fieldType.equals(object.getClass());
+		
 		return expectedClass && requestedClass && sameType;
 
 	}
 
-	public Stream<Class<?>> aceptableClasses(Class<?> clazz) {
+	Stream<Class<?>> aceptableClasses(Class<?> clazz) {
 		return this.typeController.aceptableClasses(clazz);
 	}
 
