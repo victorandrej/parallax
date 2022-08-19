@@ -66,7 +66,7 @@ public final class Trigger {
 		};
 
 		if (triggerable.async())
-			new Thread(runnable).start();
+			parallax.run(runnable);
 		else
 			runnable.run();
 	}

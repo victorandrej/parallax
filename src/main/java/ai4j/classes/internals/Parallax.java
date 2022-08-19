@@ -31,17 +31,15 @@ public class Parallax {
 	private InstanceController instanceController;
 	private Log log;
 	private ThreadQueue threadQueue;
+	private ThreadManager threadManager;
 
-	private Parallax() {
+	public Parallax(Log log, int maxTreads) {
+		this.threadManager = new ThreadManager(maxTreads);
 		this.instanceController = new InstanceController();
 		this.queueController = new QueueController();
 		this.typeController = new TypeController();
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
 		this.threadQueue = new ThreadQueue();
-	}
-
-	public Parallax(Log log) {
-		this();
 		this.log = log;
 	}
 
@@ -129,7 +127,7 @@ public class Parallax {
 	void trigger(Class<?> fromClass, Object object, CloneType cloneType, Class<?> toClass) {
 
 		for (Class<?> clazz : this.registeredClasses) {
-			new Thread(() -> {
+			threadManager.put(() -> {
 				this.threadQueue.register();
 				this.threadQueue.threadWait();
 
@@ -138,7 +136,7 @@ public class Parallax {
 					List<Field> requiredFields = this.getRequiredField(clazz);
 					requiredFields.forEach(field -> {
 
-						if (validInstance(object, field, cloneType, clazz, fromClass, toClass))
+						if (isValidInstance(object, field, cloneType, clazz, fromClass, toClass))
 							this.queueController.put(Cloner.clone(object, cloneType), field);
 
 						this.getInstance(instances, field);
@@ -154,9 +152,18 @@ public class Parallax {
 					this.threadQueue.exit();
 				}
 
-			}).start();
+			});
 		}
 
+	}
+
+	public void start() {
+		while(true)
+			this.verifyThreads();
+	}
+
+	private void verifyThreads() {
+		threadManager.verify();
 	}
 
 	private void trigger(Class<?> clazz, List<Instance> instances) {
@@ -183,25 +190,29 @@ public class Parallax {
 
 	}
 
-	private boolean validInstance(Object object, Field field, CloneType cloneType, Class<?> clazz, Class<?> fromClass,
+	private boolean isValidInstance(Object object, Field field, CloneType cloneType, Class<?> clazz, Class<?> fromClass,
 			Class<?> toClass) {
 		Required req = field.getAnnotation(Required.class);
 		boolean expectedClass = ((req.fromClass().length == 1 && req.fromClass()[0].equals(Object.class))
 				|| Arrays.asList(req.fromClass()).contains(fromClass));
-		
+
 		boolean requestedClass = (toClass.equals(Object.class) || toClass.equals(clazz));
-		
+
 		Class<?> fieldType = field.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(field.getType())
 				: field.getType();
-		
+
 		boolean sameType = fieldType.equals(object.getClass());
-		
+
 		return expectedClass && requestedClass && sameType;
 
 	}
 
 	Stream<Class<?>> aceptableClasses(Class<?> clazz) {
 		return this.typeController.aceptableClasses(clazz);
+	}
+
+	void run(Runnable runnable) {
+		this.threadManager.put(runnable);
 	}
 
 }

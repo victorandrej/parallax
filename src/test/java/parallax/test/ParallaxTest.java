@@ -13,15 +13,19 @@ public class ParallaxTest {
 	void test() {
 		Parallax parallax = new Parallax((type, error) -> {
 			System.out.println(type.name() + ": " + error);
-		});
+		},1000);
 
 		parallax.register(Class1.class);
 		parallax.register(Class2.class);
 		parallax.register(Class3.class);
 		parallax.register(Class4.class);
 		parallax.register(Class5.class);
+		parallax.register(Class6.class);
 		parallax.trigger("foi KKK", CloneType.NONE, Object.class);
-		String aa = ";";
+		parallax.trigger("foi awdawd", CloneType.NONE, Object.class);
+		parallax.trigger("foi adadsawda", CloneType.NONE, Object.class);
+		parallax.trigger("foi awdawdwaadawd", CloneType.NONE, Object.class);
+		parallax.start();
 	}
 
 }
@@ -42,6 +46,23 @@ class Class1 {
 	}
 
 }
+
+class Class6 {
+	@Required()
+	String message;
+
+	public Class6() {
+	}
+
+	@Triggerable()
+	public String message() throws InterruptedException {
+		System.out.println(message +" class 6");
+		return this.message ;
+
+	}
+
+}
+
 
 class Class2 {
 	@Required(fromClass = Class1.class)
