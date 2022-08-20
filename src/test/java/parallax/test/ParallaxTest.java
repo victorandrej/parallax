@@ -13,7 +13,7 @@ public class ParallaxTest {
 	void test() {
 		Parallax parallax = new Parallax((type, error) -> {
 			System.out.println(type.name() + ": " + error);
-		},1000);
+		},1);
 
 		parallax.register(Class1.class);
 		parallax.register(Class2.class);
@@ -39,7 +39,6 @@ class Class1 {
 
 	@Triggerable()
 	public String message() throws InterruptedException {
-		Thread.sleep(1000);
 		System.out.println(message +" class 1");
 		return this.message ;
 

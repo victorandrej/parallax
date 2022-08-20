@@ -19,7 +19,7 @@ public class ThreadManager {
 	}
 
 	public synchronized void verify() {
-		while (maxTrhreads < 0 || threadCount < maxTrhreads) {
+		while (runnables.size() > 0 && (maxTrhreads < 0 || threadCount < maxTrhreads)) {
 			threadCount++;
 			new Thread(() -> {
 				Runnable runnable = runnables.poll();
@@ -27,6 +27,7 @@ public class ThreadManager {
 					return;
 				runnable.run();
 				threadCount--;
+				System.gc();
 			}).start();
 		}
 

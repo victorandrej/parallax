@@ -30,8 +30,8 @@ public class Parallax {
 	private List<Class<?>> registeredClasses;
 	private InstanceController instanceController;
 	private Log log;
-	private ThreadQueue threadQueue;
 	private ThreadManager threadManager;
+
 
 	public Parallax(Log log, int maxTreads) {
 		this.threadManager = new ThreadManager(maxTreads);
@@ -39,7 +39,6 @@ public class Parallax {
 		this.queueController = new QueueController();
 		this.typeController = new TypeController();
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
-		this.threadQueue = new ThreadQueue();
 		this.log = log;
 	}
 
@@ -127,39 +126,37 @@ public class Parallax {
 	void trigger(Class<?> fromClass, Object object, CloneType cloneType, Class<?> toClass) {
 
 		for (Class<?> clazz : this.registeredClasses) {
-			threadManager.put(() -> {
-				this.threadQueue.register();
-				this.threadQueue.threadWait();
-
-				try {
-					List<Instance> instances = new ArrayList<>();
-					List<Field> requiredFields = this.getRequiredField(clazz);
-					requiredFields.forEach(field -> {
-
-						if (isValidInstance(object, field, cloneType, clazz, fromClass, toClass))
-							this.queueController.put(Cloner.clone(object, cloneType), field);
-
-						this.getInstance(instances, field);
-					});
-
-					if (!canTrigger(instances, requiredFields))
-						return;
-
-					this.trigger(clazz, instances);
-					instances.forEach(i -> this.queueController.poll(i.field()));
-
-				} finally {
-					this.threadQueue.exit();
-				}
-
+			this.getRequiredField(clazz).forEach(field -> {
+				if (isValidInstance(object, field, cloneType, clazz, fromClass, toClass))
+					this.queueController.put(Cloner.clone(object, cloneType), field);
 			});
+		}
+	}
+
+	private void verifyRequests() {
+
+		for (Class<?> clazz : this.registeredClasses) {
+		//	threadManager.put(() -> {
+				List<Instance> instances = new ArrayList<>();
+				List<Field> requiredFields = this.getRequiredField(clazz);
+				requiredFields.forEach(field -> this.getInstance(instances, field));
+
+				if (!canTrigger(instances, requiredFields))
+					return;
+
+				instances.forEach(i -> this.queueController.poll(i.field()));
+				this.trigger(clazz, instances);
+		//	});
 		}
 
 	}
 
 	public void start() {
-		while(true)
+		while (true) {
 			this.verifyThreads();
+			this.verifyRequests();
+		
+		}
 	}
 
 	private void verifyThreads() {
