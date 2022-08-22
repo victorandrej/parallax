@@ -2,10 +2,10 @@ package parallax.test;
 
 import org.junit.jupiter.api.Test;
 
-import ai4j.annotations.CloneType;
-import ai4j.annotations.Required;
-import ai4j.annotations.Triggerable;
-import ai4j.classes.internals.Parallax;
+import parallax.Parallax;
+import parallax.annotations.Required;
+import parallax.annotations.Triggerable;
+import parallax.util.cloner.CloneType;
 
 public class ParallaxTest {
 
@@ -13,7 +13,7 @@ public class ParallaxTest {
 	void test() {
 		Parallax parallax = new Parallax((type, error) -> {
 			System.out.println(type.name() + ": " + error);
-		},1);
+		},-1);
 
 		parallax.register(Class1.class);
 		parallax.register(Class2.class);
@@ -21,12 +21,14 @@ public class ParallaxTest {
 		parallax.register(Class4.class);
 		parallax.register(Class5.class);
 		parallax.register(Class6.class);
-		parallax.trigger("foi KKK", CloneType.NONE, Object.class);
-		parallax.trigger("foi awdawd", CloneType.NONE, Object.class);
-		parallax.trigger("foi adadsawda", CloneType.NONE, Object.class);
-		parallax.trigger("foi awdawdwaadawd", CloneType.NONE, Object.class);
+		parallax.trigger("foi KKK", CloneType.NONE, new Class<?>[] { Object.class });
+		parallax.trigger("foi awdawd", CloneType.NONE,new Class<?>[] { Object.class });
+		parallax.trigger("foi adadsawda", CloneType.NONE,new Class<?>[] { Object.class });
+		parallax.trigger("foi awdawdwaadawd", CloneType.NONE, new Class<?>[] { Object.class });
 		parallax.start();
 	}
+	
+
 
 }
 

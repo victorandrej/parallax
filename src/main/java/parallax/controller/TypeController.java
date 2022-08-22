@@ -1,4 +1,4 @@
-package ai4j.classes;
+package parallax.controller;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
+/**
+ * the controller who know which class receive the type of instance triggered
+ * 
+ * @author victor
+ *
+ */
 public class TypeController {
 	private HashMap<Class<?>, List<Class<?>>> aceptableClasses;
 

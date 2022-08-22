@@ -1,4 +1,4 @@
-package ai4j.annotations;
+package parallax.annotations;
 
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
@@ -6,6 +6,12 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
+/**
+ * field annoted with this will receive a instance of another triggered class
+ * 
+ * @author victor
+ *
+ */
 @Retention(RUNTIME)
 @Target(ElementType.FIELD)
 public @interface Required {

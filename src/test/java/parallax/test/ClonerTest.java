@@ -2,8 +2,8 @@ package parallax.test;
 
 import org.junit.jupiter.api.Test;
 
-import ai4j.annotations.CloneType;
-import ai4j.classes.Cloner;
+import parallax.util.cloner.CloneType;
+import parallax.util.cloner.Cloner;
 
 import org.junit.Assert;
 

@@ -1,4 +1,4 @@
-package ai4j.classes.internals;
+package parallax;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -12,16 +12,18 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ClassUtils;
 
-import ai4j.annotations.CloneType;
-import ai4j.annotations.Required;
-import ai4j.annotations.Singleton;
-import ai4j.classes.Cloner;
-import ai4j.classes.Instance;
-import ai4j.classes.InstanceController;
-import ai4j.classes.QueueController;
-import ai4j.classes.TypeController;
-import ai4j.classes.logs.Log;
-import ai4j.classes.logs.LogType;
+import parallax.annotations.Required;
+import parallax.annotations.Singleton;
+import parallax.controller.InstanceController;
+import parallax.controller.QueueController;
+import parallax.controller.TypeController;
+import parallax.log.Log;
+import parallax.log.LogType;
+import parallax.record.Instance;
+import parallax.thread.ThreadManager;
+import parallax.util.Jar;
+import parallax.util.cloner.CloneType;
+import parallax.util.cloner.Cloner;
 
 public class Parallax {
 
@@ -32,6 +34,11 @@ public class Parallax {
 	private Log log;
 	private ThreadManager threadManager;
 
+	public static void startApplication(Class<?> appClass, Log logger, int maxThreads) {
+		Parallax parallax = new Parallax(logger, maxThreads);
+		Jar.getAllClassFromPackage(appClass).forEach(c -> parallax.register(c));
+		parallax.start();
+	}
 
 	public Parallax(Log log, int maxTreads) {
 		this.threadManager = new ThreadManager(maxTreads);
@@ -42,6 +49,11 @@ public class Parallax {
 		this.log = log;
 	}
 
+	/**
+	 * register a class to be managed in application
+	 * 
+	 * @param clazz
+	 */
 	public void register(Class<?> clazz) {
 		if (clazz == null) {
 			this.log.push(LogType.WARNNING, "fail on register class, class is null");
@@ -63,6 +75,14 @@ public class Parallax {
 		this.log.push(type, message);
 	}
 
+	/**
+	 * create a instance of class , if a class is singleton return the created
+	 * instance previously, or create a new
+	 * 
+	 * @param instances
+	 * @param clazz
+	 * @return
+	 */
 	Optional<Object> createInstance(List<Instance> instances, Class<?> clazz) {
 
 		Object instance = null;
@@ -107,11 +127,25 @@ public class Parallax {
 		return Optional.empty();
 	}
 
+	/**
+	 * get a list of required fields in class
+	 * 
+	 * @param clazz
+	 * @return
+	 */
 	private List<Field> getRequiredField(Class<?> clazz) {
 		return Stream.of(clazz.getDeclaredFields()).filter(field -> field.isAnnotationPresent(Required.class)).toList();
 	}
 
-	public void trigger(Object object, CloneType cloneType, Class<?> toClass) {
+	/**
+	 * trigger a object to application, this method get the current class who
+	 * trigger it
+	 * 
+	 * @param object
+	 * @param cloneType
+	 * @param toClass
+	 */
+	public void trigger(Object object, CloneType cloneType, Class<?>[] toClass) {
 		String className = Thread.currentThread().getStackTrace()[2].getClassName();
 		try {
 			Class<?> fromClass = Class.forName(className);
@@ -123,51 +157,81 @@ public class Parallax {
 
 	}
 
-	void trigger(Class<?> fromClass, Object object, CloneType cloneType, Class<?> toClass) {
+	/**
+	 * trigger a object to application
+	 * 
+	 * @param fromClass
+	 * @param object
+	 * @param cloneType
+	 * @param toClass
+	 */
+	void trigger(Class<?> fromClass, Object object, CloneType cloneType, Class<?>[] toClass) {
 
 		for (Class<?> clazz : this.registeredClasses) {
 			this.getRequiredField(clazz).forEach(field -> {
-				if (isValidInstance(object, field, cloneType, clazz, fromClass, toClass))
+				if (isValidInstance(object, field, clazz, fromClass, toClass))
 					this.queueController.put(Cloner.clone(object, cloneType), field);
 			});
 		}
 	}
 
+	/**
+	 * veriy the triggered object sending to the class and triggering if valid
+	 */
 	private void verifyRequests() {
 
 		for (Class<?> clazz : this.registeredClasses) {
-		//	threadManager.put(() -> {
-				List<Instance> instances = new ArrayList<>();
-				List<Field> requiredFields = this.getRequiredField(clazz);
-				requiredFields.forEach(field -> this.getInstance(instances, field));
 
-				if (!canTrigger(instances, requiredFields))
-					return;
+			List<Instance> instances = new ArrayList<>();
+			List<Field> requiredFields = this.getRequiredField(clazz);
+			requiredFields.forEach(field -> this.getInstance(instances, field));
 
-				instances.forEach(i -> this.queueController.poll(i.field()));
-				this.trigger(clazz, instances);
-		//	});
+			if (!canTrigger(instances, requiredFields))
+				return;
+
+			instances.forEach(i -> this.queueController.poll(i.field()));
+			this.trigger(clazz, instances);
+
 		}
 
 	}
 
+	/**
+	 * start the verification of threads queue and requests
+	 */
 	public void start() {
 		while (true) {
 			this.verifyThreads();
 			this.verifyRequests();
-		
+
 		}
 	}
 
+	/**
+	 * verify the threads
+	 */
 	private void verifyThreads() {
 		threadManager.verify();
 	}
 
+	/**
+	 * trigger the class
+	 * 
+	 * @param clazz     class to be triggered
+	 * @param instances instances of fields
+	 */
 	private void trigger(Class<?> clazz, List<Instance> instances) {
 		Trigger trigger = new Trigger(clazz, instances, this);
 		trigger.trigger();
 	}
 
+	/**
+	 * verify if instance can be triggered
+	 * 
+	 * @param instances
+	 * @param requiredFields
+	 * @return
+	 */
 	private boolean canTrigger(List<Instance> instances, List<Field> requiredFields) {
 		boolean allInstanceArePopuled = instances.size() == requiredFields.size();
 		boolean anyFieldHasTriggered = requiredFields.stream()
@@ -177,6 +241,12 @@ public class Parallax {
 
 	}
 
+	/**
+	 * get instance managed in queueController and add in the list
+	 * 
+	 * @param instances
+	 * @param field
+	 */
 	private void getInstance(List<Instance> instances, Field field) {
 		if (field.getType().equals(this.getClass())) {
 			instances.add(new Instance(field, this));
@@ -187,20 +257,31 @@ public class Parallax {
 
 	}
 
-	private boolean isValidInstance(Object object, Field field, CloneType cloneType, Class<?> clazz, Class<?> fromClass,
-			Class<?> toClass) {
+	/**
+	 * verify if instance can be accepted in the sending class
+	 * 
+	 * @param instance
+	 * @param field
+	 * @param clazz
+	 * @param fromClass
+	 * @param toClass
+	 * @return
+	 */
+	private boolean isValidInstance(Object instance, Field field, Class<?> clazz, Class<?> fromClass,
+			Class<?>[] toClass) {
 		Required req = field.getAnnotation(Required.class);
 		boolean expectedClass = ((req.fromClass().length == 1 && req.fromClass()[0].equals(Object.class))
 				|| Arrays.asList(req.fromClass()).contains(fromClass));
 
-		boolean requestedClass = (toClass.equals(Object.class) || toClass.equals(clazz));
+		boolean dispachedClass = ((toClass.length == 1 && toClass[0].equals(Object.class))
+				|| Arrays.asList(toClass).contains(clazz));
 
 		Class<?> fieldType = field.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(field.getType())
 				: field.getType();
 
-		boolean sameType = fieldType.equals(object.getClass());
+		boolean sameType = fieldType.equals(instance.getClass());
 
-		return expectedClass && requestedClass && sameType;
+		return expectedClass && dispachedClass && sameType;
 
 	}
 

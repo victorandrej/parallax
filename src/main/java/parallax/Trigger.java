@@ -1,4 +1,4 @@
-package ai4j.classes.internals;
+package parallax;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -8,11 +8,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import ai4j.annotations.Required;
-import ai4j.annotations.Triggerable;
-import ai4j.classes.Instance;
-import ai4j.classes.logs.LogType;
+import parallax.annotations.Required;
+import parallax.annotations.Triggerable;
+import parallax.log.LogType;
+import parallax.record.Instance;
+import parallax.util.cloner.CloneType;
 
+/**
+ * a trigger of methods
+ * 
+ * @author victor
+ *
+ */
 public final class Trigger {
 
 	private Class<?> clazz;
@@ -25,6 +32,9 @@ public final class Trigger {
 		this.parallax = parallax;
 	}
 
+	/**
+	 * trigger the annotated method of a class
+	 */
 	void trigger() {
 
 		Optional<Object> optionalInstance = parallax.createInstance(instances, clazz);
@@ -34,7 +44,16 @@ public final class Trigger {
 		});
 	}
 
+	/**
+	 * get all method who contains the {@link Triggerable Triggerable} annotation
+	 * and order
+	 * 
+	 * @param instance
+	 */
 	private void execMethods(Object instance) {
+		if (instance == null)
+			return;
+
 		List<Integer> methodsToTrigger = getMethodsToTrigger(instance);
 		Stream.of(instance.getClass().getDeclaredMethods())
 				.filter(f -> f.isAnnotationPresent(Triggerable.class) && (methodsToTrigger.isEmpty()
@@ -44,9 +63,14 @@ public final class Trigger {
 					Triggerable t1 = o1.getAnnotation(Triggerable.class);
 					return t0.triggerOrder() == t1.triggerOrder() ? 0 : t0.triggerOrder() < t1.triggerOrder() ? -1 : 1;
 				}).forEach(method -> this.trigerMethod(method, instance));
-
 	}
 
+	/**
+	 * trigger the method and trigger the result to Parallax Application
+	 * 
+	 * @param method
+	 * @param instance
+	 */
 	private void trigerMethod(Method method, Object instance) {
 		Triggerable triggerable = method.getAnnotation(Triggerable.class);
 		method.setAccessible(true);
@@ -55,11 +79,15 @@ public final class Trigger {
 			try {
 				Object returnObject = method.invoke(instance);
 
-				if (!method.getReturnType().equals(void.class) && returnObject != null) {
-					for (Class<?> toclass : triggerable.toClass())
-						parallax.trigger(method.getDeclaringClass(), returnObject, triggerable.cloneType(), toclass);
+				if (returnObject != null) {
+					parallax.trigger(method.getDeclaringClass(), returnObject, triggerable.cloneType(),
+							triggerable.toClass());
 				}
-			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			} catch (InvocationTargetException e) {
+				parallax.trigger(method.getDeclaringClass(), e.getCause(), CloneType.NONE,
+						new Class<?>[] { Object.class });
+			} catch (IllegalAccessException | IllegalArgumentException e) {
+				parallax.trigger(method.getDeclaringClass(), e, CloneType.NONE, new Class<?>[] { Object.class });
 				parallax.log(LogType.CRITICAL, "Method: " + method.getName() + " cannot be invoked on class: "
 						+ instance.getClass().getName() + " reason: " + e.getMessage());
 			}
@@ -71,6 +99,14 @@ public final class Trigger {
 			runnable.run();
 	}
 
+	/**
+	 * get all methods to be triggered. a method just is valid if all required
+	 * fields is instanced, or the field who trigger contains it, Attention: if any
+	 * field specify an method just the method will be accepted
+	 * 
+	 * @param instance
+	 * @return
+	 */
 	private List<Integer> getMethodsToTrigger(Object instance) {
 
 		List<Integer> methodsToTrigger = new ArrayList<>();
@@ -94,6 +130,13 @@ public final class Trigger {
 		return methodsToTrigger;
 	}
 
+	/**
+	 * verify if field has instance
+	 * 
+	 * @param field
+	 * @param instance
+	 * @return
+	 */
 	private boolean hasInstance(Field field, Object instance) {
 		field.setAccessible(true);
 		try {

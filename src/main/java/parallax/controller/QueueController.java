@@ -1,4 +1,4 @@
-package ai4j.classes;
+package parallax.controller;
 
 import java.lang.reflect.Field;
 import java.util.LinkedList;
@@ -8,6 +8,12 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * the controller of triggered instance of application
+ * 
+ * @author victor
+ *
+ */
 public class QueueController {
 	private Map<Field, Queue<Object>> queues;
 

@@ -1,8 +1,14 @@
-package ai4j.classes.internals;
+package parallax.thread;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * an manager who create threads and won't let exceed max of threads;
+ * 
+ * @author victor
+ *
+ */
 public class ThreadManager {
 	private Queue<Runnable> runnables;
 	private int maxTrhreads;
@@ -18,6 +24,9 @@ public class ThreadManager {
 		this.runnables.add(runable);
 	}
 
+	/**
+	 * verify if has a free thread to start and start it
+	 */
 	public synchronized void verify() {
 		while (runnables.size() > 0 && (maxTrhreads < 0 || threadCount < maxTrhreads)) {
 			threadCount++;

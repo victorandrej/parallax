@@ -1,9 +1,15 @@
-package ai4j.classes;
+package parallax.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+/**
+ * the controller of singletons instance in application
+ * 
+ * @author victor
+ *
+ */
 public class InstanceController {
 	private Map<Class<?>, Object> instances;
 

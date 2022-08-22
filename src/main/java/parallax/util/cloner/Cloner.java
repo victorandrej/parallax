@@ -1,12 +1,17 @@
-package ai4j.classes;
+package parallax.util.cloner;
 
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang3.ClassUtils;
 
-import ai4j.annotations.CloneType;
 import sun.misc.Unsafe;
 
+/**
+ * a cloner of objects
+ * 
+ * @author victor
+ *
+ */
 public class Cloner {
 
 	private static Unsafe unsafe;

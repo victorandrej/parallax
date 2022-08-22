@@ -1,4 +1,4 @@
-package ai4j.annotations;
+package parallax.util.cloner;
 
 public enum CloneType {
 	NONE,DEEP,SHALLOW
