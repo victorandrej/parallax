@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.ClassUtils;
 
+import parallax.annotations.Entry;
 import parallax.annotations.Required;
 import parallax.annotations.Singleton;
 import parallax.controller.InstanceController;
@@ -36,7 +37,14 @@ public class Parallax {
 
 	public static void startApplication(Class<?> appClass, Log logger, int maxThreads) {
 		Parallax parallax = new Parallax(logger, maxThreads);
-		Jar.getAllClassFromPackage(appClass).forEach(c -> parallax.register(c));
+		List<Class<?>> initClasses = new ArrayList<>();
+		Jar.getAllClassFromPackage(appClass).forEach(c -> {
+			if (c.isAnnotationPresent(Entry.class))
+				initClasses.add(c);
+
+			parallax.register(c);
+		});
+		initClasses.forEach(c -> new Trigger(c, new ArrayList<>(), parallax).trigger());
 		parallax.start();
 	}
 

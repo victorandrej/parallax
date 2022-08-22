@@ -3,17 +3,17 @@ package parallax.test;
 import org.junit.jupiter.api.Test;
 
 import parallax.Parallax;
+import parallax.annotations.Entry;
 import parallax.annotations.Required;
 import parallax.annotations.Triggerable;
 import parallax.util.cloner.CloneType;
 
 public class ParallaxTest {
-
 	@Test
 	void test() {
 		Parallax parallax = new Parallax((type, error) -> {
 			System.out.println(type.name() + ": " + error);
-		},-1);
+		}, -1);
 
 		parallax.register(Class1.class);
 		parallax.register(Class2.class);
@@ -22,15 +22,42 @@ public class ParallaxTest {
 		parallax.register(Class5.class);
 		parallax.register(Class6.class);
 		parallax.trigger("foi KKK", CloneType.NONE, new Class<?>[] { Object.class });
-		parallax.trigger("foi awdawd", CloneType.NONE,new Class<?>[] { Object.class });
-		parallax.trigger("foi adadsawda", CloneType.NONE,new Class<?>[] { Object.class });
+		parallax.trigger("foi awdawd", CloneType.NONE, new Class<?>[] { Object.class });
+		parallax.trigger("foi adadsawda", CloneType.NONE, new Class<?>[] { Object.class });
 		parallax.trigger("foi awdawdwaadawd", CloneType.NONE, new Class<?>[] { Object.class });
 		parallax.start();
 	}
-	
+
+	@Test
+	void startTest() {
+
+		Parallax.startApplication(Class1.class, (t,m)->System.out.println(m), 10);
+		
+	}
 
 
 }
+@Entry
+class Class9 {
+
+	public Class9() {
+	}
+
+	@Triggerable(async = false)
+	public void message() throws InterruptedException {
+		Thread.sleep(1000);
+		System.out.println("iniciou");
+		
+	}
+	
+	@Triggerable(async = false)
+	public void messagea() throws InterruptedException {
+		System.out.println("iniciou2");
+
+	}
+
+}
+
 
 class Class1 {
 	@Required()
@@ -41,13 +68,12 @@ class Class1 {
 
 	@Triggerable()
 	public String message() throws InterruptedException {
-		System.out.println(message +" class 1");
-		return this.message ;
+		System.out.println(message + " class 1");
+		return this.message;
 
 	}
 
 }
-
 class Class6 {
 	@Required()
 	String message;
@@ -57,13 +83,12 @@ class Class6 {
 
 	@Triggerable()
 	public String message() throws InterruptedException {
-		System.out.println(message +" class 6");
-		return this.message ;
+		System.out.println(message + " class 6");
+		return this.message;
 
 	}
 
 }
-
 
 class Class2 {
 	@Required(fromClass = Class1.class)
@@ -75,9 +100,9 @@ class Class2 {
 	@Triggerable
 	public String method() {
 
-		System.out.println(message  + " class 2");
-		
-		return message ;
+		System.out.println(message + " class 2");
+
+		return message;
 	}
 
 }
@@ -85,16 +110,17 @@ class Class2 {
 class Class3 {
 	@Required(fromClass = Class1.class)
 	String message;
-	
+
 	@Required(fromClass = Class2.class)
 	String message2;
+
 	public Class3() {
 	}
 
 	@Triggerable
 	public void method() {
 
-		System.out.println(message + "|||||"+ message2 +  "  class 3");
+		System.out.println(message + "|||||" + message2 + "  class 3");
 	}
 
 }
@@ -102,16 +128,17 @@ class Class3 {
 class Class5 {
 	@Required(fromClass = Class1.class)
 	String message;
-	
+
 	@Required(fromClass = Class2.class)
 	String message2;
+
 	public Class5() {
 	}
 
 	@Triggerable
 	public void method() {
 
-		System.out.println(message + "|||||"+ message2 +  "  class 5");
+		System.out.println(message + "|||||" + message2 + "  class 5");
 	}
 
 }
@@ -125,10 +152,9 @@ class Class4 {
 
 	@Triggerable
 	public void method() throws InterruptedException {
-	
+
 		System.out.println(message + " Class4");
-		
-		
+
 	}
 
 }
