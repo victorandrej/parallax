@@ -42,9 +42,16 @@ the parallax not compare the classes, but yes the instance.
 ![image](https://user-images.githubusercontent.com/67382564/186208362-3f45e9dd-60f1-4f88-993c-6002a47e57af.png)
 
 
+
+
 when fields of a class is completely populed automaticaly the framwork will trigger the specifyed methods.
 
 ![image](https://user-images.githubusercontent.com/67382564/186205220-b2937696-031e-403c-89b5-c7c84341befb.png)
+
+fields with no 'Required' annotation is invisible to fremework
+
+![image](https://user-images.githubusercontent.com/67382564/186221708-d345756a-25b0-445c-b5fc-03795ee9c3d3.png)
+
 
 you can specify who will receive and  who you receive
 
@@ -61,6 +68,15 @@ specifying 'methodTrigger' only the method with this order will be triggered
 the 'async' flag when false make a execution of method sync blocking start of another methods in this class until this method be finished
 
 ![image](https://user-images.githubusercontent.com/67382564/186211635-0c47931b-479a-4fd8-8ab7-5f87098ddc85.png)
+
+classes with no fields are called aways creating a loop;
+
+![image](https://user-images.githubusercontent.com/67382564/186222837-cdcf0fc5-6f62-4e13-a115-bec8b84d1283.png)
+
+controllated loops are possible too 
+
+![image](https://user-images.githubusercontent.com/67382564/186224791-c1c46344-8a4a-4b5a-a753-47e4d472d12d.png)
+
 
 
 
