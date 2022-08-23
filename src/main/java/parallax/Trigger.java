@@ -36,11 +36,12 @@ public final class Trigger {
 	 * trigger the annotated method of a class
 	 */
 	void trigger() {
+		parallax.run(() -> {
+			Optional<Object> optionalInstance = parallax.createInstance(instances, clazz);
+			optionalInstance.ifPresentOrElse(this::execMethods, () -> {
+				parallax.log(LogType.WARNNING, "cannot trigger the class: " + clazz.getName());
 
-		Optional<Object> optionalInstance = parallax.createInstance(instances, clazz);
-		optionalInstance.ifPresentOrElse(this::execMethods, () -> {
-			parallax.log(LogType.WARNNING, "cannot trigger the class: " + clazz.getName());
-
+			});
 		});
 	}
 
