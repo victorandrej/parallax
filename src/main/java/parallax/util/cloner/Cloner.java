@@ -2,8 +2,7 @@ package parallax.util.cloner;
 
 import java.lang.reflect.Field;
 
-import org.apache.commons.lang3.ClassUtils;
-
+import parallax.util.Primitive;
 import sun.misc.Unsafe;
 
 /**
@@ -79,7 +78,7 @@ public class Cloner {
 	private static <T> void deepClone(Class<?> clazz, T instance, T clone)
 			throws IllegalArgumentException, IllegalAccessException {
 		for (Field field : clazz.getDeclaredFields()) {
-			boolean isPrimitive = ClassUtils.isPrimitiveOrWrapper(field.getType())
+			boolean isPrimitive = Primitive.isPrimitiveOrWrapper(field.getType())
 					|| field.getType().equals(String.class);
 			field.setAccessible(true);
 			field.set(clone, isPrimitive ? field.get(instance) : deep(field.get(instance)));

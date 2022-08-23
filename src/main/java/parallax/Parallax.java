@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.ClassUtils;
-
 import parallax.annotations.Entry;
 import parallax.annotations.Required;
 import parallax.annotations.Singleton;
@@ -23,10 +21,13 @@ import parallax.log.LogType;
 import parallax.record.Instance;
 import parallax.thread.ThreadManager;
 import parallax.util.Jar;
+import parallax.util.Primitive;
 import parallax.util.cloner.CloneType;
 import parallax.util.cloner.Cloner;
 
 public class Parallax {
+
+	private static Parallax instance;
 
 	private QueueController queueController;
 	private TypeController typeController;
@@ -34,18 +35,17 @@ public class Parallax {
 	private InstanceController instanceController;
 	private Log log;
 	private ThreadManager threadManager;
+	private volatile boolean exit;
 
 	public static void startApplication(Class<?> appClass, Log logger, int maxThreads) {
-		Parallax parallax = new Parallax(logger, maxThreads);
-		List<Class<?>> initClasses = new ArrayList<>();
-		Jar.getAllClassFromPackage(appClass).forEach(c -> {
-			if (c.isAnnotationPresent(Entry.class))
-				initClasses.add(c);
+		Parallax.instance = new Parallax(logger, maxThreads);
+		Jar.getAllClassFromPackage(appClass).forEach(c -> Parallax.instance.register(c));
+		Parallax.instance.start();
+	}
 
-			parallax.register(c);
-		});
-		initClasses.forEach(c -> new Trigger(c, new ArrayList<>(), parallax).trigger());
-		parallax.start();
+	public static void exitApplication() {
+		if (Parallax.instance != null)
+			Parallax.instance.exit();
 	}
 
 	public Parallax(Log log, int maxTreads) {
@@ -55,6 +55,7 @@ public class Parallax {
 		this.typeController = new TypeController();
 		this.registeredClasses = Collections.synchronizedList(new ArrayList<>());
 		this.log = log;
+		this.exit = false;
 	}
 
 	/**
@@ -67,6 +68,9 @@ public class Parallax {
 			this.log.push(LogType.WARNNING, "fail on register class, class is null");
 			return;
 		}
+
+		if (clazz.isAnnotationPresent(Entry.class))
+			new Trigger(clazz, new ArrayList<>(), this).trigger();
 
 		Stream.of(clazz.getDeclaredFields()).forEach(f -> {
 			Required req = f.getAnnotation(Required.class);
@@ -209,10 +213,16 @@ public class Parallax {
 	 */
 	public void start() {
 		while (true) {
+			if (exit)
+				return;
+
 			this.verifyThreads();
 			this.verifyRequests();
-
 		}
+	}
+
+	public void exit() {
+		this.exit = true;
 	}
 
 	/**
@@ -284,7 +294,7 @@ public class Parallax {
 		boolean dispachedClass = ((toClass.length == 1 && toClass[0].equals(Object.class))
 				|| Arrays.asList(toClass).contains(clazz));
 
-		Class<?> fieldType = field.getType().isPrimitive() ? ClassUtils.primitiveToWrapper(field.getType())
+		Class<?> fieldType = field.getType().isPrimitive() ? Primitive.primitiveToWrapper(field.getType())
 				: field.getType();
 
 		boolean sameType = fieldType.equals(instance.getClass());
