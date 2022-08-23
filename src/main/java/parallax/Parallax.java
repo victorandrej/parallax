@@ -217,7 +217,7 @@ public class Parallax {
 	/**
 	 * start the verification of threads queue and requests
 	 */
-	public void start() {
+	 void start() {
 		while (true) {
 			if (exit)
 				return;
