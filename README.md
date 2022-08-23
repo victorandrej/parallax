@@ -29,7 +29,7 @@ the 'cloneType' define who type of clone, the framework will use, can be Shallow
 
 ![image](https://user-images.githubusercontent.com/67382564/186212867-cad16b22-d011-4117-8536-b1de980498b1.png)
 
-all classes are recreated before trigger, but you can create a singleton instance of class
+all classes are recreated before trigger, but you can create a singleton instance of class, when a class be singleton just the requeired fields will be updated
 
 ![image](https://user-images.githubusercontent.com/67382564/186206736-84dc15da-b54a-4182-9aac-618a0400e1cc.png)
 
@@ -40,7 +40,6 @@ the exceptions are treated in the same way of the remainder application
 the parallax not compare the classes, but yes the instance.
 
 ![image](https://user-images.githubusercontent.com/67382564/186208362-3f45e9dd-60f1-4f88-993c-6002a47e57af.png)
-
 
 
 
