@@ -39,8 +39,17 @@ public class Parallax {
 
 	public static void startApplication(Class<?> appClass, Log logger, int maxThreads) {
 		Parallax.instance = new Parallax(logger, maxThreads);
-		Jar.getAllClassFromPackage(appClass).forEach(c -> Parallax.instance.register(c));
+		List<Class<?>> entryClasses = new ArrayList<>();
+		Jar.getAllClassFromPackage(appClass).forEach(c -> {
+			if (c.isAnnotationPresent(Entry.class))
+				entryClasses.add(c);
+
+			Parallax.instance.register(c);
+		});
+		entryClasses.forEach(c -> new Trigger(c, new ArrayList<>(), Parallax.instance).trigger());
+
 		Parallax.instance.start();
+
 	}
 
 	public static void exitApplication() {
@@ -68,9 +77,6 @@ public class Parallax {
 			this.log.push(LogType.WARNNING, "fail on register class, class is null");
 			return;
 		}
-
-		if (clazz.isAnnotationPresent(Entry.class))
-			new Trigger(clazz, new ArrayList<>(), this).trigger();
 
 		Stream.of(clazz.getDeclaredFields()).forEach(f -> {
 			Required req = f.getAnnotation(Required.class);
@@ -199,7 +205,7 @@ public class Parallax {
 			requiredFields.forEach(field -> this.getInstance(instances, field));
 
 			if (!canTrigger(instances, requiredFields))
-				return;
+				continue;
 
 			instances.forEach(i -> this.queueController.poll(i.field()));
 			this.trigger(clazz, instances);
