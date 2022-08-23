@@ -19,7 +19,13 @@ specifying 'methodTrigger' only the method with this order will be triggered
 
 ![image](https://user-images.githubusercontent.com/67382564/186209910-7438ec89-c3d5-4594-8ce5-847ee8085214.png)
 
+the 'async' flag when false make a execution of method sync blocking start of another methods in this class until this method be finished
 
+![image](https://user-images.githubusercontent.com/67382564/186211635-0c47931b-479a-4fd8-8ab7-5f87098ddc85.png)
+
+the 'cloneType' define who type of clone, the framework will use, can be Shallow,Deep,None
+
+![image](https://user-images.githubusercontent.com/67382564/186212867-cad16b22-d011-4117-8536-b1de980498b1.png)
 
 all classes are recreated before trigger, but you can create a singleton instance of class
 
