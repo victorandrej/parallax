@@ -272,7 +272,7 @@ public class Parallax {
 	 * @param field
 	 */
 	private void getInstance(List<Instance> instances, Field field) {
-		if (field.getType().equals(this.getClass())) {
+		if (field.getType().isAssignableFrom(this.getClass())) {
 			instances.add(new Instance(field, this));
 			return;
 		}
@@ -303,7 +303,7 @@ public class Parallax {
 		Class<?> fieldType = field.getType().isPrimitive() ? Primitive.primitiveToWrapper(field.getType())
 				: field.getType();
 
-		boolean sameType = fieldType.equals(instance.getClass());
+		boolean sameType = fieldType.isAssignableFrom(instance.getClass());
 
 		return expectedClass && dispachedClass && sameType;
 
