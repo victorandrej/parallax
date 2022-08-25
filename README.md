@@ -1,5 +1,6 @@
-# parallax
-a new way to create parallel projects
+![parallax-effect-banner](https://user-images.githubusercontent.com/67382564/186742000-fdb88e50-8aeb-453e-a35d-2c42a9234bc5.gif)
+
+## a new way to create parallel projects
 
 this project is destined to create a parallel project in a way more simple.
 
