@@ -1,14 +1,11 @@
 package parallax;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import parallax.annotations.Required;
 import parallax.annotations.Triggerable;
 import parallax.log.LogType;
 import parallax.record.Instance;
@@ -55,15 +52,10 @@ public final class Trigger {
 		if (instance == null)
 			return;
 
-		List<Integer> methodsToTrigger = getMethodsToTrigger(instance);
-		Stream.of(instance.getClass().getDeclaredMethods())
-				.filter(f -> f.isAnnotationPresent(Triggerable.class) && (methodsToTrigger.isEmpty()
-						|| methodsToTrigger.contains(f.getAnnotation(Triggerable.class).triggerOrder())))
-				.sorted((o0, o1) -> {
-					Triggerable t0 = o0.getAnnotation(Triggerable.class);
-					Triggerable t1 = o1.getAnnotation(Triggerable.class);
-					return t0.triggerOrder() == t1.triggerOrder() ? 0 : t0.triggerOrder() < t1.triggerOrder() ? -1 : 1;
-				}).forEach(method -> this.trigerMethod(method, instance));
+		Stream.of(instance.getClass().getDeclaredMethods()).forEach(method -> {
+			if (method.isAnnotationPresent(Triggerable.class))
+				this.trigerMethod(method, instance);
+		});
 	}
 
 	/**
@@ -98,56 +90,6 @@ public final class Trigger {
 			parallax.run(runnable);
 		else
 			runnable.run();
-	}
-
-	/**
-	 * get all methods to be triggered. a method just is valid if all required
-	 * fields is instanced, or the field who trigger contains it, Attention: if any
-	 * field specify an method just the method will be accepted
-	 * 
-	 * @param instance
-	 * @return
-	 */
-	private List<Integer> getMethodsToTrigger(Object instance) {
-
-		List<Integer> methodsToTrigger = new ArrayList<>();
-
-		for (Field f : instance.getClass().getFields()) {
-
-			if (!hasInstance(f, instance) || !f.isAnnotationPresent(Required.class)
-					|| !f.getAnnotation(Required.class).trigger()) {
-				continue;
-			}
-
-			int[] values = f.getAnnotation(Required.class).methodTrigger();
-
-			for (int i : values) {
-				if (!methodsToTrigger.contains(i))
-					methodsToTrigger.add(i);
-			}
-
-		}
-
-		return methodsToTrigger;
-	}
-
-	/**
-	 * verify if field has instance
-	 * 
-	 * @param field
-	 * @param instance
-	 * @return
-	 */
-	private boolean hasInstance(Field field, Object instance) {
-		field.setAccessible(true);
-		try {
-			return field.get(instance) != null;
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-			parallax.log(LogType.WARNNING, "Cannot verify instance of field: " + field.getName() + " of class: "
-					+ field.getDeclaringClass() + " reason: " + e.getMessage());
-
-		}
-		return false;
 	}
 
 }

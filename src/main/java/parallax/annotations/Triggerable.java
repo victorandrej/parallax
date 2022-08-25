@@ -18,23 +18,19 @@ import parallax.util.cloner.CloneType;
 @Target(METHOD)
 public @interface Triggerable {
 	/**
-	 * make execution of method sync or async
+	 * make execution of method sync or async. if false the another methods won't be triggered until the current method finish
 	 * 
 	 */
 	public boolean async() default true;
 
-	/**
-	 * order of execution of methods
-	 * 
-	 */
-	public int triggerOrder() default 1;
+
 
 	/**
 	 * type of clone used in method return
 	 * 
 	 * @return
 	 */
-	public CloneType cloneType() default CloneType.NONE;
+	public CloneType cloneType() default CloneType.DEEP;
 
 	/**
 	 * who class will receive this instance, Object.class represents all

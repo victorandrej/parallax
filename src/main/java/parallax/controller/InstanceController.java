@@ -1,8 +1,8 @@
 package parallax.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * the controller of singletons instance in application
@@ -14,17 +14,16 @@ public class InstanceController {
 	private Map<Class<?>, Object> instances;
 
 	public InstanceController() {
-		this.instances = new HashMap<>();
+		this.instances = new ConcurrentHashMap<>();
 	}
 
-	public synchronized void put(Class<?> clazz, Object instance) {
+	public synchronized void put(Object instance) {
 
-		this.instances.put(clazz, instance);
+		this.instances.put(instance.getClass(), instance);
 
 	}
 
 	public Optional<Object> get(Class<?> clazz) {
-
 		return Optional.ofNullable(this.instances.get(clazz));
 	}
 

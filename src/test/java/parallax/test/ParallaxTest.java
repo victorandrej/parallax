@@ -6,27 +6,9 @@ import parallax.Parallax;
 import parallax.annotations.Entry;
 import parallax.annotations.Required;
 import parallax.annotations.Triggerable;
-import parallax.util.cloner.CloneType;
 
 public class ParallaxTest {
-	@Test
-	void test() {
-		Parallax parallax = new Parallax((type, error) -> {
-			System.out.println(type.name() + ": " + error);
-		}, -1);
 
-		parallax.register(Class1.class);
-		parallax.register(Class2.class);
-		parallax.register(Class3.class);
-		parallax.register(Class4.class);
-		parallax.register(Class5.class);
-		parallax.register(Class6.class);
-		parallax.trigger("foi KKK", CloneType.NONE, new Class<?>[] { Object.class });
-		parallax.trigger("foi awdawd", CloneType.NONE, new Class<?>[] { Object.class });
-		parallax.trigger("foi adadsawda", CloneType.NONE, new Class<?>[] { Object.class });
-		parallax.trigger("foi awdawdwaadawd", CloneType.NONE, new Class<?>[] { Object.class });
-		parallax.start();
-	}
 
 	@Test
 	void startTest() {
