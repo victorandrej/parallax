@@ -2,8 +2,10 @@
 
 ## a new way to create parallel projects
 
-this project is destined to create a parallel project in a way more simple.
+### this project is destined to create a parallel project in a way more simple.
 
+#### [SourceForge Project](https://sourceforge.net/projects/parallax/)
+#### [Article of Project ](https://docs.google.com/document/d/13TBBp87xjL84loMePoa1Gplj0KovqmC2a2LA3zHmPhM/edit?usp=sharing)
 
 to start a parallax you need to invoke the static method startApplication, they receive a Log interface whos represents the system log, and max threads to be used, if max thread will be set lower to 0 the framework will assume unlimited threads.
 
@@ -64,9 +66,3 @@ classes with no fields are called aways creating a loop;
 
 ![image](https://user-images.githubusercontent.com/67382564/186222837-cdcf0fc5-6f62-4e13-a115-bec8b84d1283.png)
 
-
-![diagrama](https://user-images.githubusercontent.com/67382564/186203859-3a7e8651-1f90-432c-9ff4-25f8173531bf.png)
-
-
-
-https://sourceforge.net/projects/parallax/
