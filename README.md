@@ -25,11 +25,12 @@ the 'Entry' annotation  is the start up of application , this will trigger all m
 ![image](https://user-images.githubusercontent.com/67382564/186214369-584f50c9-a4d2-4a78-ad99-625587150c19.png)
 
 
-the 'cloneType' define who type of clone, the framework will use, can be Shallow,Deep,None
+the 'cloneType' define who type of clone, the framework will use, can be Shallow,Deep,None the default clone type is Deep
 
 ![image](https://user-images.githubusercontent.com/67382564/186212867-cad16b22-d011-4117-8536-b1de980498b1.png)
 
 Singleton annotation creates a singleton instance of the class,  when the instance is requisite, the instance is singleton to a specific class not to all classes
+
 ![image](https://user-images.githubusercontent.com/67382564/186206736-84dc15da-b54a-4182-9aac-618a0400e1cc.png)
 
 the exceptions are treated in the same way of the remainder application
@@ -39,8 +40,6 @@ the exceptions are treated in the same way of the remainder application
 the parallax not compare the classes, but yes the instance.
 
 ![image](https://user-images.githubusercontent.com/67382564/186208362-3f45e9dd-60f1-4f88-993c-6002a47e57af.png)
-
-
 
 when fields of a class is completely populed automaticaly the framwork will trigger the specifyed methods.
 
