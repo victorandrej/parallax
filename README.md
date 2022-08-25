@@ -29,8 +29,7 @@ the 'cloneType' define who type of clone, the framework will use, can be Shallow
 
 ![image](https://user-images.githubusercontent.com/67382564/186212867-cad16b22-d011-4117-8536-b1de980498b1.png)
 
-all classes are recreated before trigger, but you can create a singleton instance of class, when a class be singleton just the requeired fields will be updated
-
+Singleton annotation creates a singleton instance of the class,  when the instance is requisite, the instance is singleton to a specific class not to all classes
 ![image](https://user-images.githubusercontent.com/67382564/186206736-84dc15da-b54a-4182-9aac-618a0400e1cc.png)
 
 the exceptions are treated in the same way of the remainder application
@@ -56,14 +55,7 @@ you can specify who will receive and  who you receive
 
 ![image](https://user-images.githubusercontent.com/67382564/186206204-3463713c-e5e7-4658-ba0c-2635fdad0997.png)
 
-when a field is populed and the 'trigger' flag is equals  true, autoamatically this class will be triggered  ignoring unpopuleds fields
-
-![image](https://user-images.githubusercontent.com/67382564/186209596-eee350d9-f093-4b55-b1d0-2cd541b745b9.png)
-
-specifying 'methodTrigger' only the method with this order will be triggered
-
-![image](https://user-images.githubusercontent.com/67382564/186209910-7438ec89-c3d5-4594-8ce5-847ee8085214.png)
-
+ 
 the 'async' flag when false make a execution of method sync blocking start of another methods in this class until this method be finished
 
 ![image](https://user-images.githubusercontent.com/67382564/186211635-0c47931b-479a-4fd8-8ab7-5f87098ddc85.png)
@@ -71,12 +63,6 @@ the 'async' flag when false make a execution of method sync blocking start of an
 classes with no fields are called aways creating a loop;
 
 ![image](https://user-images.githubusercontent.com/67382564/186222837-cdcf0fc5-6f62-4e13-a115-bec8b84d1283.png)
-
-controllated loops are possible too 
-
-![image](https://user-images.githubusercontent.com/67382564/186224791-c1c46344-8a4a-4b5a-a753-47e4d472d12d.png)
-
-
 
 
 ![diagrama](https://user-images.githubusercontent.com/67382564/186203859-3a7e8651-1f90-432c-9ff4-25f8173531bf.png)
