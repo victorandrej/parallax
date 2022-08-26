@@ -1,8 +1,11 @@
-# parallax
-a new way to create parallel projects
+![parallax-effect-banner](https://user-images.githubusercontent.com/67382564/186742000-fdb88e50-8aeb-453e-a35d-2c42a9234bc5.gif)
 
-this project is destined to create a parallel project in a way more simple.
+## a new way to create parallel projects
 
+### this project is destined to create a parallel project in a way more simple.
+
+#### [SourceForge Project](https://sourceforge.net/projects/parallax/)
+#### [Article of Project ](https://docs.google.com/document/d/13TBBp87xjL84loMePoa1Gplj0KovqmC2a2LA3zHmPhM/edit?usp=sharing)
 
 to start a parallax you need to invoke the static method startApplication, they receive a Log interface whos represents the system log, and max threads to be used, if max thread will be set lower to 0 the framework will assume unlimited threads.
 
@@ -54,7 +57,11 @@ you can specify who will receive and  who you receive
 
 ![image](https://user-images.githubusercontent.com/67382564/186206204-3463713c-e5e7-4658-ba0c-2635fdad0997.png)
 
+<<<<<<< HEAD
 
+=======
+ 
+>>>>>>> ee1a794bf73943672b20a90bd23efbe46c61059a
 the 'async' flag when false make a execution of method sync blocking start of another methods in this class until this method be finished
 
 ![image](https://user-images.githubusercontent.com/67382564/186211635-0c47931b-479a-4fd8-8ab7-5f87098ddc85.png)
@@ -63,9 +70,12 @@ classes with no fields are called aways creating a loop;
 
 ![image](https://user-images.githubusercontent.com/67382564/186222837-cdcf0fc5-6f62-4e13-a115-bec8b84d1283.png)
 
+<<<<<<< HEAD
 
 ![diagrama](https://user-images.githubusercontent.com/67382564/186203859-3a7e8651-1f90-432c-9ff4-25f8173531bf.png)
 
 
 
 https://sourceforge.net/projects/parallax/
+=======
+>>>>>>> ee1a794bf73943672b20a90bd23efbe46c61059a
