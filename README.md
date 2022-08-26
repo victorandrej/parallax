@@ -25,11 +25,11 @@ the 'Entry' annotation  is the start up of application , this will trigger all m
 ![image](https://user-images.githubusercontent.com/67382564/186214369-584f50c9-a4d2-4a78-ad99-625587150c19.png)
 
 
-the 'cloneType' define who type of clone, the framework will use, can be Shallow,Deep,None
+the 'cloneType' define who type of clone, the framework will use, can be Shallow,Deep,None the default clone type is Deep
 
 ![image](https://user-images.githubusercontent.com/67382564/186212867-cad16b22-d011-4117-8536-b1de980498b1.png)
 
-all classes are recreated before trigger, but you can create a singleton instance of class, when a class be singleton just the requeired fields will be updated
+Singleton annotation creates a singleton instance of the class,  when the instance is requisite, the instance is singleton to a specific class not to all classes
 
 ![image](https://user-images.githubusercontent.com/67382564/186206736-84dc15da-b54a-4182-9aac-618a0400e1cc.png)
 
@@ -40,8 +40,6 @@ the exceptions are treated in the same way of the remainder application
 the parallax not compare the classes, but yes the instance.
 
 ![image](https://user-images.githubusercontent.com/67382564/186208362-3f45e9dd-60f1-4f88-993c-6002a47e57af.png)
-
-
 
 when fields of a class is completely populed automaticaly the framwork will trigger the specifyed methods.
 
@@ -56,13 +54,6 @@ you can specify who will receive and  who you receive
 
 ![image](https://user-images.githubusercontent.com/67382564/186206204-3463713c-e5e7-4658-ba0c-2635fdad0997.png)
 
-when a field is populed and the 'trigger' flag is equals  true, autoamatically this class will be triggered  ignoring unpopuleds fields
-
-![image](https://user-images.githubusercontent.com/67382564/186209596-eee350d9-f093-4b55-b1d0-2cd541b745b9.png)
-
-specifying 'methodTrigger' only the method with this order will be triggered
-
-![image](https://user-images.githubusercontent.com/67382564/186209910-7438ec89-c3d5-4594-8ce5-847ee8085214.png)
 
 the 'async' flag when false make a execution of method sync blocking start of another methods in this class until this method be finished
 
@@ -71,12 +62,6 @@ the 'async' flag when false make a execution of method sync blocking start of an
 classes with no fields are called aways creating a loop;
 
 ![image](https://user-images.githubusercontent.com/67382564/186222837-cdcf0fc5-6f62-4e13-a115-bec8b84d1283.png)
-
-controllated loops are possible too 
-
-![image](https://user-images.githubusercontent.com/67382564/186224791-c1c46344-8a4a-4b5a-a753-47e4d472d12d.png)
-
-
 
 
 ![diagrama](https://user-images.githubusercontent.com/67382564/186203859-3a7e8651-1f90-432c-9ff4-25f8173531bf.png)
