@@ -46,8 +46,8 @@ public class Parallax {
 	private static void registerClasses(Class<?> appClass) {
 		List<Class<?>> entryClasses = new ArrayList<>();
 		Jar.getAllClassFromPackage(appClass).forEach(c -> {
-			if (c.isAnnotationPresent(Singleton.class)
-					&& (c.isAnnotationPresent(Entry.class) || Parallax.isTriggerableClass(c))) {
+			boolean isTriggerableClass = Parallax.isTriggerableClass(c);
+			if (c.isAnnotationPresent(Singleton.class) && isTriggerableClass) {
 
 				Parallax.instance.log(LogType.CRITICAL,
 						"Class: " + c.getName() + " cannot be triggerable and sigleton");
@@ -57,8 +57,8 @@ public class Parallax {
 
 			if (c.isAnnotationPresent(Entry.class))
 				entryClasses.add(c);
-
-			Parallax.instance.register(c);
+			if (isTriggerableClass)
+				Parallax.instance.register(c);
 		});
 
 		Parallax.triggerEntryClasses(entryClasses);
