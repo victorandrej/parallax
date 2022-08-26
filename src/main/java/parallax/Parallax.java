@@ -52,11 +52,12 @@ public class Parallax {
 
 			if (!c.isAnnotationPresent(Singleton.class)) {
 				Parallax.instance.register(c);
- 
+
 				if (c.isAnnotationPresent(Entry.class))
 					entryClasses.add(c);
+				return;
 			}
-			
+
 			Parallax.instance.log(LogType.CRITICAL, "Class: " + c.getName() + " cannot be triggerable and sigleton");
 			Parallax.instance.exit();
 
