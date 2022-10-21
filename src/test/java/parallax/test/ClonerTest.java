@@ -1,11 +1,10 @@
 package parallax.test;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import parallax.util.cloner.CloneType;
 import parallax.util.cloner.Cloner;
-
-import org.junit.Assert;
 
 public class ClonerTest {
 	 @Test
@@ -14,7 +13,7 @@ public class ClonerTest {
 		 
 		 Test1 clone = Cloner.clone(principal, CloneType.DEEP);
 		 
-		 Assert.assertNotEquals(principal.teste3, clone.teste3);
+		 Assertions.assertNotEquals(principal.teste3, clone.teste3);
 	 }
 	 
 	 @Test
@@ -23,7 +22,7 @@ public class ClonerTest {
 		 
 		 Test1 clone = Cloner.clone(principal, CloneType.SHALLOW);
 		 
-		 Assert.assertEquals(principal.teste3, clone.teste3);
+		 Assertions.assertEquals(principal.teste3, clone.teste3);
 	 }
 	 
 

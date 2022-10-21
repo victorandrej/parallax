@@ -38,8 +38,7 @@ public class Parallax {
 	}
 
 	private static boolean isTriggerableClass(Class<?> clazz) {
-		return Stream.of(clazz.getDeclaredFields()).anyMatch(f -> f.isAnnotationPresent(Required.class))
-				|| Stream.of(clazz.getDeclaredMethods()).anyMatch(f -> f.isAnnotationPresent(Triggerable.class));
+		return clazz.isAnnotationPresent(parallax.annotations.Trigger.class) || clazz.isAnnotationPresent(Entry.class);
 
 	}
 
@@ -73,13 +72,23 @@ public class Parallax {
 
 	public static void startApplication(Class<?> appClass, Log logger, int maxThreads) {
 		Parallax.instance = new Parallax(logger, maxThreads);
+		Parallax.instance.instanceController.put(Parallax.instance);
 		Parallax.registerClasses(appClass);
 		Parallax.instance.start();
 
 	}
 
 	private static void triggerEntryClasses(List<Class<?>> entryClasses) {
-		entryClasses.forEach(c -> new Trigger(c, new ArrayList<>(), Parallax.instance).trigger());
+
+		entryClasses.forEach(c -> {
+
+			List<Instance> instances = new ArrayList<>();
+
+			Parallax parallaxInstance = Parallax.instance;
+			parallaxInstance.getRequiredField(c).forEach(f -> parallaxInstance.getInstance(instances, f));
+
+			parallaxInstance.trigger(c, instances);
+		});
 	}
 
 	private QueueController queueController;
@@ -213,7 +222,7 @@ public class Parallax {
 		boolean expectedClass = ((req.fromClass().length == 1 && req.fromClass()[0].equals(Object.class))
 				|| Arrays.asList(req.fromClass()).contains(fromClass));
 
-		boolean dispachedClass = ((toClass.length == 1 && toClass[0].equals(Object.class))
+		boolean dispachedClass = ((toClass.length == 0)
 				|| Arrays.asList(toClass).contains(clazz));
 
 		Class<?> fieldType = field.getType().isPrimitive() ? Primitive.primitiveToWrapper(field.getType())
@@ -245,6 +254,9 @@ public class Parallax {
 			this.log.push(LogType.WARNNING, "fail on register class, class is null");
 			return;
 		}
+
+		if (!clazz.isAnnotationPresent(parallax.annotations.Trigger.class))
+			return;
 
 		Stream.of(clazz.getDeclaredFields()).forEach(f -> {
 			Required req = f.getAnnotation(Required.class);
@@ -297,6 +309,7 @@ public class Parallax {
 
 		for (Class<?> clazz : this.registeredClasses) {
 			this.getRequiredField(clazz).forEach(field -> {
+
 				if (isValidInstance(object, field, clazz, fromClass, toClass))
 					this.queueController.put(Cloner.clone(object, cloneType), field);
 			});
